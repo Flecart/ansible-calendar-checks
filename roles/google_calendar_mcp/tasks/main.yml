@@ -1,0 +1,43 @@
+---
+- name: Clone google-calendar-mcp
+  ansible.builtin.git:
+    repo: https://github.com/nspady/google-calendar-mcp.git
+    dest: "{{ google_calendar_mcp_dir }}"
+    update: true
+  become: true
+  become_user: calendar
+
+- name: Install npm dependencies
+  ansible.builtin.command:
+    cmd: npm install
+    chdir: "{{ google_calendar_mcp_dir }}"
+  become: true
+  become_user: calendar
+
+- name: Build google-calendar-mcp
+  ansible.builtin.command:
+    cmd: npm run build
+    chdir: "{{ google_calendar_mcp_dir }}"
+  become: true
+  become_user: calendar
+
+- name: Copy OAuth credentials to remote
+  ansible.builtin.copy:
+    src: "{{ local_credentials_path }}"
+    dest: "{{ remote_credentials_path }}"
+    owner: calendar
+    group: calendar
+    mode: "0600"
+  become: true
+
+- name: Set GOOGLE_OAUTH_CREDENTIALS in .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ calendar_user_home }}/.bashrc"
+    regexp: '^export GOOGLE_OAUTH_CREDENTIALS='
+    line: 'export GOOGLE_OAUTH_CREDENTIALS="{{ remote_credentials_path }}"'
+    state: present
+    create: true
+    owner: calendar
+    group: calendar
+    mode: "0644"
+  become: true

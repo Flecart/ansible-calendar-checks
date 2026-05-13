@@ -1,0 +1,10 @@
+---
+# Paths on the controller (local machine)
+local_credentials_path: "{{ lookup('env', 'HOME') }}/google-calendar-mcp/credentials.json"
+
+# Paths on the remote machine (under the calendar user's home)
+calendar_user_home: /home/calendar
+remote_credentials_path: /home/calendar/gcp-oauth.keys.json
+google_calendar_mcp_dir: /home/calendar/google-calendar-mcp
+nanobot_dir: /home/calendar/nanobot
+nanobot_skills_dir: /home/calendar/.nanobot/workspace/skills

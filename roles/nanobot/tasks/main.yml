@@ -1,0 +1,99 @@
+---
+- name: Ensure python3-full is installed (needed for venv on Debian)
+  ansible.builtin.apt:
+    name: python3-full
+    state: present
+  become: true
+
+- name: Create virtualenv for calendar user
+  ansible.builtin.command:
+    cmd: python3 -m venv {{ nanobot_venv }}
+    creates: "{{ nanobot_venv }}/bin/activate"
+  become: true
+  become_user: calendar
+
+- name: Clone nanobot
+  ansible.builtin.git:
+    repo: https://github.com/HKUDS/nanobot.git
+    dest: "{{ nanobot_dir }}"
+    update: true
+  become: true
+  become_user: calendar
+
+- name: Install nanobot into virtualenv (pip install -e .)
+  ansible.builtin.pip:
+    name: "."
+    chdir: "{{ nanobot_dir }}"
+    editable: true
+    virtualenv: "{{ nanobot_venv }}"
+  become: true
+  become_user: calendar
+
+- name: Ensure nanobot config directory exists
+  ansible.builtin.file:
+    path: "{{ nanobot_config_dir }}"
+    state: directory
+    owner: calendar
+    group: calendar
+    mode: "0700"
+  become: true
+
+- name: Deploy nanobot config.json
+  ansible.builtin.template:
+    src: config.json.j2
+    dest: "{{ nanobot_config_dir }}/config.json"
+    owner: calendar
+    group: calendar
+    mode: "0644"
+  become: true
+
+- name: Deploy secrets env file (mode 600)
+  ansible.builtin.template:
+    src: secrets.env.j2
+    dest: "{{ nanobot_secrets_file }}"
+    owner: calendar
+    group: calendar
+    mode: "0600"
+  become: true
+
+- name: Source secrets env file from .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ calendar_user_home }}/.bashrc"
+    regexp: '^set -a && source {{ nanobot_secrets_file }}'
+    line: "set -a && source {{ nanobot_secrets_file }} && set +a"
+    state: present
+    create: true
+    owner: calendar
+    group: calendar
+    mode: "0644"
+  become: true
+
+- name: Add venv activation to .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ calendar_user_home }}/.bashrc"
+    regexp: '^source {{ nanobot_venv }}/bin/activate'
+    line: "source {{ nanobot_venv }}/bin/activate"
+    state: present
+    create: true
+    owner: calendar
+    group: calendar
+    mode: "0644"
+  become: true
+
+- name: Ensure nanobot skills directory exists
+  ansible.builtin.file:
+    path: "{{ nanobot_skills_dir }}"
+    state: directory
+    owner: calendar
+    group: calendar
+    mode: "0755"
+  become: true
+
+- name: Copy skills to remote
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../skills/"
+    dest: "{{ nanobot_skills_dir }}/"
+    owner: calendar
+    group: calendar
+    mode: "0755"
+  become: true

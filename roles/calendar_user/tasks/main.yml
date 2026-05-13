@@ -1,0 +1,8 @@
+---
+- name: Create calendar user
+  ansible.builtin.user:
+    name: calendar
+    shell: /bin/bash
+    create_home: true
+    state: present
+  become: true

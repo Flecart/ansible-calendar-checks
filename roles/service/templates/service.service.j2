@@ -1,0 +1,19 @@
+[Unit]
+Description={{ service_name }}
+After=network.target
+
+[Service]
+Type=simple
+User={{ service_user }}
+Group={{ service_group }}
+WorkingDirectory={{ deploy_dir }}
+ExecStart={{ deploy_dir }}/{{ service_name }}
+Restart=on-failure
+RestartSec=5s
+StandardOutput=append:{{ log_dir }}/stdout.log
+StandardError=append:{{ log_dir }}/stderr.log
+Environment=PORT={{ service_port }}
+Environment=ENV={{ service_env }}
+
+[Install]
+WantedBy=multi-user.target

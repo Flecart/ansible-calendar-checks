@@ -1,0 +1,22 @@
+{
+  "providers": {
+    "openai: {
+      "apiKey": "${NANOBOT_API_KEY}"
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "gpt-5.4"
+    }
+  },
+  "tools": {
+    "mcpServers": {
+      "google-calendar": {
+        "command": "{{ google_calendar_mcp_dir }}/build/index.js",
+        "env": {
+          "GOOGLE_OAUTH_CREDENTIALS": "{{ remote_credentials_path }}"
+        }
+      }
+    }
+  }
+}

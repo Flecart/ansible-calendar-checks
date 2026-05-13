@@ -1,0 +1,5 @@
+---
+calendar_user_home: /home/calendar
+local_credentials_path: "{{ lookup('env', 'HOME') }}/google-calendar-mcp/credentials.json"
+remote_credentials_path: /home/calendar/gcp-oauth.keys.json
+google_calendar_mcp_dir: /home/calendar/google-calendar-mcp

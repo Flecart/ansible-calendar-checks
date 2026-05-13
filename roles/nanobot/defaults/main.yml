@@ -1,0 +1,7 @@
+---
+calendar_user_home: /home/calendar
+nanobot_dir: /home/calendar/nanobot
+nanobot_skills_dir: /home/calendar/.nanobot/workspace/skills
+nanobot_venv: /home/calendar/nanobot/.venv
+nanobot_config_dir: /home/calendar/.nanobot
+nanobot_secrets_file: /home/calendar/.nanobot/secrets.env

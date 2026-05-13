@@ -1,0 +1,11 @@
+---
+service_name: my-service
+service_user: "{{ ansible_user }}"
+service_group: "{{ ansible_user }}"
+deploy_dir: /opt/{{ service_name }}
+log_dir: /var/log/{{ service_name }}
+service_port: 8080
+service_env: production
+
+# Set to true to (re)start the service even when no files changed
+force_restart: false

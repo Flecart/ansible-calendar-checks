@@ -1,0 +1,12 @@
+---
+- name: Deploy calendar automation stack
+  hosts: calendar_hosts
+  gather_facts: true
+  vars_files:
+    - ../secrets.yml
+
+  roles:
+    - role: base
+    - role: calendar_user
+    - role: google_calendar_mcp
+    - role: nanobot

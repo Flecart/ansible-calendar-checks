@@ -1,0 +1,48 @@
+---
+- name: Create service directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ service_user }}"
+    group: "{{ service_group }}"
+    mode: "0755"
+  loop:
+    - "{{ deploy_dir }}"
+    - "{{ log_dir }}"
+
+- name: Deploy service files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ deploy_dir }}/"
+    owner: "{{ service_user }}"
+    group: "{{ service_group }}"
+    mode: "0644"
+  with_fileglob:
+    - "files/*"
+  notify: restart service
+
+- name: Deploy service config from template
+  ansible.builtin.template:
+    src: config.j2
+    dest: "{{ deploy_dir }}/config"
+    owner: "{{ service_user }}"
+    group: "{{ service_group }}"
+    mode: "0644"
+  notify: restart service
+
+- name: Deploy systemd unit
+  ansible.builtin.template:
+    src: service.service.j2
+    dest: /etc/systemd/system/{{ service_name }}.service
+    mode: "0644"
+  become: true
+  notify:
+    - reload systemd
+    - restart service
+
+- name: Enable and start service
+  ansible.builtin.systemd:
+    name: "{{ service_name }}"
+    enabled: true
+    state: started
+  become: true

@@ -1,0 +1,13 @@
+---
+# Variables shared across all hosts in the service_hosts group
+
+service_name: my-service
+service_user: "{{ ansible_user }}"
+service_group: "{{ ansible_user }}"
+
+deploy_dir: /opt/{{ service_name }}
+log_dir: /var/log/{{ service_name }}
+
+# Overridable per host in host_vars/<host>.yml
+service_port: 8080
+service_env: production
