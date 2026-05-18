@@ -3,7 +3,7 @@
   hosts: calendar_hosts
   gather_facts: true
   vars_files:
-    - ../secrets.yml
+    - "{{ playbook_dir }}/../secrets.yml"
 
   roles:
     - role: base

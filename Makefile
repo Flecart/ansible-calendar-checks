@@ -1,8 +1,11 @@
 HOST ?= overleaf
 
-.PHONY: deploy ping check
+.PHONY: deploy ping check setup-secrets
 
-deploy:
+setup-secrets:
+	@test -f secrets.yml || cp secrets.yml.example secrets.yml
+
+deploy: setup-secrets
 	ansible-playbook playbooks/deploy.yml --limit $(HOST)
 
 ping:

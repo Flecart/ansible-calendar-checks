@@ -14,6 +14,7 @@ Ansible playbook that provisions the **overleaf** server with:
 | Ansible ≥ 2.14 | `pip install ansible` |
 | SSH access | `~/.ssh/overleaf.pem` key available |
 | GCP credentials | `~/google-calendar-mcp/credentials.json` on this machine |
+| API key | Copy `secrets.yml.example` → `secrets.yml` and set `nanobot_api_key` (or run `make setup-secrets` then edit) |
 
 The credentials file must exist locally before running the playbook — Ansible copies it to the remote at `/home/calendar/gcp-oauth.keys.json` and wires `GOOGLE_OAUTH_CREDENTIALS` into the `calendar` user's `.bashrc`.
 

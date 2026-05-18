@@ -1,4 +1,14 @@
 ---
+- name: Require nanobot API key from secrets.yml
+  ansible.builtin.assert:
+    that:
+      - nanobot_api_key is defined
+      - nanobot_api_key | length > 0
+      - "'REPLACE_ME' not in nanobot_api_key"
+    fail_msg: >-
+      Copy secrets.yml.example to secrets.yml and set nanobot_api_key
+      (deploy loads {{ playbook_dir }}/../secrets.yml).
+
 - name: Ensure python3-full is installed (needed for venv on Debian)
   ansible.builtin.apt:
     name: python3-full
@@ -55,6 +65,7 @@
     group: calendar
     mode: "0600"
   become: true
+  no_log: true
 
 - name: Source secrets env file from .bashrc
   ansible.builtin.lineinfile:
