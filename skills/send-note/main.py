@@ -37,20 +37,16 @@ SENDER_NAME        = os.environ.get('SENDER_NAME', '')
 
 WHITELIST_PATH = _HERE / 'email.txt'
 
-REMINDER_SUBJECT = 'Reminder: please respond — {event}'
+REMINDER_SUBJECT = 'Jinesis Lab Event Reminder: please respond'
 
 REMINDER_BODY = (
-    "Hi,\n\n"
-    "This is a quick reminder about the following invitation:\n"
+    "Hi, Jinesis Bot here!\n\n"
+    "Our lab policy needs you to always respond on google calendar so we know if you will attend.\n"
+    "Here is the event link:\n"
     "  {event}\n\n"
-    "The bot (me 🤖) noticed that you haven't responded yet. If you are ready, please choose how you would like to respond:\n\n"
-    "  1. Accept — you plan to attend.\n"
-    "  2. Decline — you cannot attend this time.\n"
-    "  3. Note to Zhijing — you prefer not to be included for this type of meeting "
-    "(including going forward).\n\n"
-    "Reply to this message (or follow up as you usually do) with 1, 2, or 3 so we know if you will attend.\n"
+    "Click on the event and select the appropriate option on google calendar so we know if you will attend.\n"
     "As always, have a nice day :D\n\n"
-    "Thank you,\n{sender}\n"
+    "Thank you,\nJinesis Bot\n"
 )
 
 
