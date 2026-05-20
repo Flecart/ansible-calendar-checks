@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Calendar RSVP Reminder on schedule
+Requires=calendar-reminder.service
+
+[Timer]
+OnCalendar={{ reminder_on_calendar }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

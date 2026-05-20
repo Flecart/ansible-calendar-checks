@@ -1,0 +1,11 @@
+---
+- name: reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+- name: restart reminder timer
+  ansible.builtin.systemd:
+    name: calendar-reminder.timer
+    state: restarted
+  become: true

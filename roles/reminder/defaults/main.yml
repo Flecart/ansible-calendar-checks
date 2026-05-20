@@ -1,0 +1,20 @@
+---
+calendar_user_home: /home/calendar
+reminder_dir: /home/calendar/reminder
+reminder_venv: /home/calendar/reminder/.venv
+reminder_log_dir: /var/log/calendar-reminder
+
+# Local paths (on the Ansible controller)
+local_credentials_path: "{{ lookup('env', 'HOME') }}/google-calendar-mcp/credentials.json"
+local_token_path: "{{ playbook_dir }}/../src/token.json"
+local_email_txt_path: "{{ playbook_dir }}/../skills/send-note/email.txt"
+local_events_txt_path: "{{ playbook_dir }}/../src/events.txt"
+
+# systemd timer schedule (OnCalendar= syntax)
+# Default: every weekday at 09:00 UTC
+reminder_on_calendar: "Mon..Fri *-*-* 09:00:00"
+
+# Runtime toggles (overridable in secrets.yml or host_vars)
+reminder_lookahead_days: 7
+reminder_include_tentative: "false"
+reminder_sender_name: "Jinesis Bot"

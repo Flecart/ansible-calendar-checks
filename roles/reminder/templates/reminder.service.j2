@@ -1,0 +1,14 @@
+[Unit]
+Description=Calendar RSVP Reminder
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=calendar
+Group=calendar
+WorkingDirectory={{ reminder_dir }}
+EnvironmentFile={{ reminder_dir }}/.env
+ExecStart={{ reminder_venv }}/bin/python3 {{ reminder_dir }}/main.py
+StandardOutput=append:{{ reminder_log_dir }}/stdout.log
+StandardError=append:{{ reminder_log_dir }}/stderr.log

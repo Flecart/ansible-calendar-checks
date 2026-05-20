@@ -1,0 +1,169 @@
+---
+- name: Require reminder secrets from secrets.yml
+  ansible.builtin.assert:
+    that:
+      - reminder_gmail_user is defined and reminder_gmail_user | length > 0
+      - reminder_gmail_app_password is defined and reminder_gmail_app_password | length > 0
+      - "'REPLACE_ME' not in reminder_gmail_user"
+      - "'REPLACE_ME' not in reminder_gmail_app_password"
+    fail_msg: >-
+      Copy secrets.yml.example to secrets.yml and set
+      reminder_gmail_user and reminder_gmail_app_password.
+
+- name: Ensure python3-full is installed
+  ansible.builtin.apt:
+    name: python3-full
+    state: present
+  become: true
+
+- name: Create reminder deploy directory
+  ansible.builtin.file:
+    path: "{{ reminder_dir }}"
+    state: directory
+    owner: calendar
+    group: calendar
+    mode: "0750"
+  become: true
+
+- name: Create log directory
+  ansible.builtin.file:
+    path: "{{ reminder_log_dir }}"
+    state: directory
+    owner: calendar
+    group: calendar
+    mode: "0750"
+  become: true
+
+- name: Copy reminder source files
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../src/{{ item }}"
+    dest: "{{ reminder_dir }}/{{ item }}"
+    owner: calendar
+    group: calendar
+    mode: "0644"
+  loop:
+    - main.py
+    - requirements.txt
+  become: true
+  notify: restart reminder timer
+
+- name: Create virtualenv for reminder
+  ansible.builtin.command:
+    cmd: python3 -m venv {{ reminder_venv }}
+    creates: "{{ reminder_venv }}/bin/activate"
+  become: true
+  become_user: calendar
+
+- name: Install reminder dependencies into virtualenv
+  ansible.builtin.pip:
+    requirements: "{{ reminder_dir }}/requirements.txt"
+    virtualenv: "{{ reminder_venv }}"
+  become: true
+  become_user: calendar
+
+- name: Deploy .env from secrets (mode 600)
+  ansible.builtin.template:
+    src: reminder.env.j2
+    dest: "{{ reminder_dir }}/.env"
+    owner: calendar
+    group: calendar
+    mode: "0600"
+  become: true
+  no_log: true
+  notify: restart reminder timer
+
+- name: Copy email whitelist
+  ansible.builtin.copy:
+    src: "{{ local_email_txt_path }}"
+    dest: "{{ reminder_dir }}/email.txt"
+    owner: calendar
+    group: calendar
+    mode: "0644"
+  become: true
+
+- name: Check if events.txt exists locally
+  ansible.builtin.stat:
+    path: "{{ local_events_txt_path }}"
+  register: local_events_txt
+  delegate_to: localhost
+  become: false
+
+- name: Copy events.txt if it exists locally
+  ansible.builtin.copy:
+    src: "{{ local_events_txt_path }}"
+    dest: "{{ reminder_dir }}/events.txt"
+    owner: calendar
+    group: calendar
+    mode: "0644"
+  become: true
+  when: local_events_txt.stat.exists
+
+- name: Warn if events.txt is missing
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: src/events.txt not found locally — all upcoming events will be checked.
+      Create src/events.txt with event title patterns and re-run to filter.
+  when: not local_events_txt.stat.exists
+
+- name: Copy Google OAuth credentials (mode 600)
+  ansible.builtin.copy:
+    src: "{{ local_credentials_path }}"
+    dest: "{{ reminder_dir }}/credentials.json"
+    owner: calendar
+    group: calendar
+    mode: "0600"
+  become: true
+
+- name: Check if token.json exists locally
+  ansible.builtin.stat:
+    path: "{{ local_token_path }}"
+  register: local_token
+  delegate_to: localhost
+  become: false
+
+- name: Copy token.json if it exists locally
+  ansible.builtin.copy:
+    src: "{{ local_token_path }}"
+    dest: "{{ reminder_dir }}/token.json"
+    owner: calendar
+    group: calendar
+    mode: "0600"
+  become: true
+  when: local_token.stat.exists
+
+- name: Note if token.json is missing
+  ansible.builtin.debug:
+    msg: >-
+      NOTE: src/token.json not found locally.
+      After deploy, SSH in as the calendar user and run:
+        cd {{ reminder_dir }} && {{ reminder_venv }}/bin/python3 main.py --dry-run
+      to complete the one-time Google OAuth flow.
+  when: not local_token.stat.exists
+
+- name: Deploy systemd service unit
+  ansible.builtin.template:
+    src: reminder.service.j2
+    dest: /etc/systemd/system/calendar-reminder.service
+    mode: "0644"
+  become: true
+  notify:
+    - reload systemd
+    - restart reminder timer
+
+- name: Deploy systemd timer unit
+  ansible.builtin.template:
+    src: reminder.timer.j2
+    dest: /etc/systemd/system/calendar-reminder.timer
+    mode: "0644"
+  become: true
+  notify:
+    - reload systemd
+    - restart reminder timer
+
+- name: Enable and start timer
+  ansible.builtin.systemd:
+    name: calendar-reminder.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true
