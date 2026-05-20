@@ -6,6 +6,6 @@
     - "{{ playbook_dir }}/../secrets.yml"
 
   roles:
-    - role: base
-    - role: calendar_user
+    # - role: base
+    # - role: calendar_user
     - role: reminder
