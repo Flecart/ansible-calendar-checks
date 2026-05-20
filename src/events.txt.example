@@ -1,0 +1,10 @@
+# Event title patterns to monitor — one substring per line (case-insensitive).
+# Any upcoming event whose title contains one of these strings will be checked
+# for pending RSVPs.  Leave this file empty (or delete it) to check every event.
+#
+# Examples:
+#   Lab Meeting
+#   Reading Group
+#   Team Sync
+Lab Meeting
+Reading Group
